@@ -1,0 +1,11 @@
+# to build an image from this repo
+docker build --tag factor .
+
+# to run
+docker run --publish 8080:8080 factor
+# add --detach to daemonize
+# add -i for interactive when debugging
+
+# docker create --name factor-container -ti factor
+# to start and log into the container
+# docker start -ai factor-container
