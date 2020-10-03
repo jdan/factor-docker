@@ -59,7 +59,7 @@ task "TASKS"
   " sprintf ;
 
 : with-example-db ( quot -- )
-  '[ "example.db" <sqlite-db> _ with-db ] call ; inline
+  '[ "/data/example.db" <sqlite-db> _ with-db ] call ; inline
 
 ! http://re-factor.blogspot.com/2010/08/hello-web.html
 TUPLE: hello < dispatcher ;
@@ -78,13 +78,6 @@ TUPLE: hello < dispatcher ;
     <hello-action> "" add-responder ;
 
 : run-hello ( -- )
-  [ task recreate-table
-    T{ task { text "Clone the docker image" } { complete t } } insert-tuple
-    T{ task { text "Run the image in a container" } { complete t } } insert-tuple
-    T{ task { text "Get creative" } } insert-tuple
-    T{ task { text "Follow <a href='https://twitter.com/jdan'>jdan</a> on twitter" } } insert-tuple
-  ] with-example-db
-
   <hello> main-responder set-global
   8080 httpd wait-for-server ;
 
