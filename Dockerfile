@@ -9,10 +9,6 @@ RUN wget https://downloads.factorcode.org/releases/0.98/factor-linux-x86-64-0.98
   && rm factor-linux-x86-64-0.98.tar.gz
 
 WORKDIR /factor
-COPY server.factor work/
-COPY mydb work/mydb/
-COPY create-students.sql .
+COPY server.factor .
 
-RUN sqlite3 example.db < create-students.sql
-
-# CMD ./factor server.factor
+CMD ./factor server.factor
