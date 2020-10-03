@@ -1,6 +1,6 @@
 ! Copyright (C) 2020 Jordan Scales.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors furnace.actions http.server
+USING: accessors furnace.actions http.server io
        http.server.dispatchers http.server.responses io.servers kernel
        sequences namespaces db db.tuples db.types db.sqlite fry formatting ;
 
@@ -16,13 +16,47 @@ task "TASKS"
 } define-persistent
 
 : task>html ( task -- html )
-  [ complete>> [ "checked" ] [ "" ] if ] [ text>> ] bi
+  [ id>> ] [ complete>> [ "checked" ] [ "" ] if ] [ text>> ] tri
   "<div>
-    <input type='checkbox' %s> %s
+    <label>
+      <input data-id='%s' type='checkbox' %s> %s
+    </label>
   </div>
   " sprintf ;
 
 : tasks>html ( seq -- html ) [ task>html ] map " " join ;
+
+: layout ( html -- html )
+  "<!doctype html>
+  <html>
+  <head>
+    <title>Factor + SQLite + Docker</title>
+    <style>
+      main {
+        width: 30em;
+        margin: 100px auto 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      %s
+    </main>
+    <script>
+      document.querySelectorAll('input[data-id][type=checkbox]').forEach((el) => {
+        el.addEventListener('click', async (e) => {
+          await fetch(`/tasks/${e.target.getAttribute('data-id')}`, {
+            method: 'POST',
+            body: JSON.stringify({
+              complete: e.target.checked
+            })
+          })
+        })
+      })
+    </script>
+  </body>
+  </html>
+  " sprintf ;
 
 : with-example-db ( quot -- )
   '[ "example.db" <sqlite-db> _ with-db ] call ; inline
@@ -34,7 +68,7 @@ TUPLE: hello < dispatcher ;
 
 : <hello-action> ( -- action )
   <page-action>
-    [ [ T{ task } select-tuples ] with-example-db tasks>html
+    [ [ T{ task } select-tuples ] with-example-db tasks>html layout
       "text/html"
       <content>
     ] >>display ;
